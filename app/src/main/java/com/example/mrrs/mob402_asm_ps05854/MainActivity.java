@@ -1,6 +1,7 @@
 package com.example.mrrs.mob402_asm_ps05854;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,14 +18,15 @@ import java.util.ArrayList;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 
 public class MainActivity extends AppCompatActivity {
-    private static final String URL_ADDRESS ="http://192.168.39.101:3000";
+    private static final String URL_ADDRESS ="http://10.200.200.85:3000";
 
             ListView lvCustomer;
-    Button btnAdd;
-    Dialog dialog;
+    Button btnAdd , btnDel;
+    Dialog dialog, dialog_del;
     ArrayList<Customer> arrayCustomer;
     ListAdapter adapter;
     private Socket mSocket;
@@ -35,6 +37,25 @@ public class MainActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
     }
+
+
+    private Emitter.Listener remove = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+            Log.e("[Data]", args[0].toString()+"");
+            String data =  args[0].toString();
+//
+            if(data == "true"){
+                Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+
+            }else{
+//                Log.d("CAN NOT LOGIN", "can' login");
+                Toast.makeText(getApplicationContext(), "Can't Delete", Toast.LENGTH_SHORT).show();
+            }
+//
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,23 +71,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         arrayCustomer = new ArrayList<Customer>();
-//        arrayCustomer.add(new Customer("Nguyen Duc Thanh Tam","PS05854" ,"ndttam.dev@gmail.com", "012314561231", "Nam"));
         updateList();
 
 
         lvCustomer.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                try{
-                    Toast.makeText(getApplicationContext() , ((TextView) view).getText(), Toast.LENGTH_LONG).show();
-                }
-                catch (Exception err){
-                    Log.e("[ERROR]", err+"");
-
-                }
+                String id = arrayCustomer.get(i).Code;
+                            arrayCustomer.remove(i);
+                            adapter.notifyDataSetChanged();
+                            removeStudent(id);
                 return false;
             }
         });
+
+
 
     }
 
@@ -110,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
         mSocket.emit("client-addCust", name,code, email, sdt, gender);
     }
 
+    private void removeStudent(String position){
+        mSocket.emit("remove-students", position);
+    }
     private void init(){
         lvCustomer = (ListView) findViewById(R.id.listViewCustomer);
         btnAdd = (Button) findViewById(R.id.btnAdd);

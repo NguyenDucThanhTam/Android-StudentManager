@@ -21,7 +21,7 @@ import io.socket.emitter.Emitter;
 public class LoginActivity extends Activity {
 
     private static final String TAG = RegisterActivity.class.getSimpleName();
-    private  static final String URL_ADDRESS = "http://192.168.39.101:3000";
+    private  static final String URL_ADDRESS = "http://10.200.200.85:3000";
 
     private Button btnLogin;
     private Button btnLinkToRegister;
